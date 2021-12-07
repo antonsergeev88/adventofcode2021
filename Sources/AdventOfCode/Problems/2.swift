@@ -51,20 +51,40 @@ struct Day2: Problem {
         return text.split(separator: "\n").map(String.init).compactMap(Command.init(inputLine:))
     }
 
-    func process(_ input: [Command]) async throws -> Int {
-        var vertical = 0
-        var horizontal = 0
-        input.forEach { command in
-            switch command.kind {
-            case .forward: horizontal += command.value
-            case .down: vertical += command.value
-            case .up: vertical -= command.value
+    func process(_ input: [Command]) async throws -> (first: Int, second: Int) {
+        let first: Int = {
+            var vertical = 0
+            var horizontal = 0
+            input.forEach { command in
+                switch command.kind {
+                case .forward: horizontal += command.value
+                case .down: vertical += command.value
+                case .up: vertical -= command.value
+                }
             }
-        }
-        return vertical * horizontal
+            return vertical * horizontal
+        }()
+
+        let second: Int = {
+            var vertical = 0
+            var horizontal = 0
+            var aim = 0
+            input.forEach { command in
+                switch command.kind {
+                case .forward:
+                    horizontal += command.value
+                    vertical += aim * command.value
+                case .down: aim += command.value
+                case .up: aim -= command.value
+                }
+            }
+            return vertical * horizontal
+        }()
+
+        return (first: first, second: second)
     }
 
-    func text(from output: Int) -> String {
+    func text(from output: (first: Int, second: Int)) -> String {
         String(describing: output)
     }
 }
