@@ -17,19 +17,15 @@ struct Day1: Problem {
     func process(_ input: [Int]) async throws -> (first: Int, second: Int) {
         let first = input
             .slidingWindow(size: 2)
-            .reduce(0) { partialResult, pair in
-                pair[0] < pair[1] ? partialResult + 1 : partialResult
-            }
+            .filter { $0[0] < $0[1] }
+            .count
 
         let second = input
             .slidingWindow(size: 3)
-            .map {
-                $0.reduce(0, +)
-            }
+            .map { $0.reduce(0, +) }
             .slidingWindow(size: 2)
-            .reduce(0) { partialResult, pair in
-                pair[0] < pair[1] ? partialResult + 1 : partialResult
-            }
+            .filter { $0[0] < $0[1] }
+            .count
 
         return (first: first, second: second)
     }
