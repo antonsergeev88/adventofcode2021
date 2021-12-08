@@ -4,6 +4,9 @@ struct Day1: Problem {
     func input(from stream: InputStream) throws -> [Int] {
         var data = Data()
         let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
+        defer {
+            buffer.deallocate()
+        }
         while stream.hasBytesAvailable {
             let count = stream.read(buffer, maxLength: 1024)
             data.append(buffer, count: count)
