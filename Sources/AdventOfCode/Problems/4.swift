@@ -4,13 +4,17 @@ extension Day4 {
     struct Board {
         private let values: [[Int]]
         private var moves: [Int] = []
+        private(set) var isFull = false
         init(values: [[Int]]) {
             self.values = values
         }
         mutating func addMove(_ move: Int) {
             moves.append(move)
+            if !isFull {
+                isFull = _isFull
+            }
         }
-        var isFull: Bool {
+        private var _isFull: Bool {
             for i in 0..<5 {
                 if check(row: i) {
                     return true
@@ -83,25 +87,46 @@ struct Day4: Problem {
         return (moves, boards)
     }
 
-    func process(_ input: (moves: [Int], boards: [Board])) async throws -> Int {
-        var lastMove: Int?
-        var lastBoard: Int?
-        let moves = input.moves
-        var boards = input.boards
-        moves: for move in 0..<moves.count {
-            for board in 0..<boards.count {
-                boards[board].addMove(moves[move])
-                if boards[board].isFull {
-                    lastMove = move
-                    lastBoard = board
-                    break moves
+    func process(_ input: (moves: [Int], boards: [Board])) async throws -> (first: Int, second: Int) {
+        let first: Int = {
+            var lastMove: Int?
+            var lastBoard: Int?
+            let moves = input.moves
+            var boards = input.boards
+            moves: for move in 0..<moves.count {
+                for board in 0..<boards.count {
+                    boards[board].addMove(moves[move])
+                    if boards[board].isFull {
+                        lastMove = move
+                        lastBoard = board
+                        break moves
+                    }
                 }
             }
-        }
-        return moves[lastMove!] * boards[lastBoard!].uncheckedSum
+            return moves[lastMove!] * boards[lastBoard!].uncheckedSum
+        }()
+
+        let second: Int = {
+            var lastMove: Int?
+            var lastBoard: Int?
+            let moves = input.moves
+            var boards = input.boards
+            moves: for move in 0..<moves.count {
+                for board in 0..<boards.count {
+                    boards[board].addMove(moves[move])
+                    if !boards.map(\.isFull).contains(false) {
+                        lastMove = move
+                        lastBoard = board
+                        break moves
+                    }
+                }
+            }
+            return moves[lastMove!] * boards[lastBoard!].uncheckedSum
+        }()
+        return (first, second)
     }
 
-    func text(from output: Int) -> String {
+    func text(from output: (first: Int, second: Int)) -> String {
         String(describing: output)
     }
 }
