@@ -18,8 +18,6 @@ struct Day7: Problem {
     }
 
     func process(_ input: [Int]) async throws -> (first: Int, second: Int) {
-//        let input = [16,1,2,0,4,2,7,1,2,14]
-
         let sorted = input.sorted()
         let median = sorted[input.count / 2]
         let first = input.reduce(0) { partialResult, element in
