@@ -78,7 +78,37 @@ struct Day12: Problem {
 
     func process(_ input: Map) async throws -> (first: Int, second: Int) {
         let first: Int = {
-            0
+            var counter: [Node: Int] = {
+                var counter = [Node: Int]()
+                func add(root: Node) {
+                    guard counter[root] == nil else {
+                        return
+                    }
+                    counter[root] = 0
+                    for child in root.paths {
+                        add(root: child)
+                    }
+                }
+                add(root: input.start)
+                return counter
+            }()
+            var first = 0
+            func findPathsToEnd(root: Node) {
+                guard counter[root]! < 1 || root.isBig else {
+                    return
+                }
+                guard root.name != "end" else {
+                    first += 1
+                    return
+                }
+                counter[root]! += 1
+                for child in root.paths {
+                    findPathsToEnd(root: child)
+                }
+                counter[root]! -= 1
+            }
+            findPathsToEnd(root: input.start)
+            return first
         }()
         let second: Int = {
             0
