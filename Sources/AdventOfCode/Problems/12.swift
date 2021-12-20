@@ -111,7 +111,49 @@ struct Day12: Problem {
             return first
         }()
         let second: Int = {
-            0
+            var counter: [Node: Int] = {
+                var counter = [Node: Int]()
+                func add(root: Node) {
+                    guard counter[root] == nil else {
+                        return
+                    }
+                    counter[root] = 0
+                    for child in root.paths {
+                        add(root: child)
+                    }
+                }
+                add(root: input.start)
+                return counter
+            }()
+            var first = 0
+            func findPathsToEnd(root: Node) {
+                counter[root]! += 1
+                defer {
+                    counter[root]! -= 1
+                }
+                guard
+                    counter.filter({!$0.key.isBig}).filter({$0.value > 1}).count <= 1,
+                    counter.filter({!$0.key.isBig}).filter({$0.value > 2}).isEmpty
+                else {
+                    return
+                }
+                guard root.name != "start" else {
+                    return
+                }
+                guard root.name != "end" else {
+                    first += 1
+                    return
+                }
+
+                for child in root.paths {
+                    findPathsToEnd(root: child)
+                }
+
+            }
+            input.start.paths.forEach { node in
+                findPathsToEnd(root: node)
+            }
+            return first
         }()
         return (first, second)
     }
