@@ -15,6 +15,7 @@ struct App {
             try await Day11().run(with: "11"),
             try await Day12().run(with: "12"),
             try await Day13().run(with: "13"),
+            try await Day14().run(with: "14"),
         ]
             .enumerated()
             .forEach { (offset, element) in
