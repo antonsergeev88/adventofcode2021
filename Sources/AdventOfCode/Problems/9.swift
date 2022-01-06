@@ -45,32 +45,24 @@ extension Day9 {
     }
 }
 
-struct Day9: Problem {
-    func input(from stream: InputStream) throws -> Map {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day9: Day {
+    let dayNumber = 9
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> Map {
+            .with(strings: input)
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return .with(strings: text.split(separator: "\n").map(String.init))
     }
 
-    func process(_ input: Map) async throws -> (first: Int, second: Int) {
-        let input = Map.with(strings: [
-            "2199943210",
-            "3987894921",
-            "9856789892",
-            "8767896789",
-            "9899965678",
-        ])
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: Map) async throws -> Int {
+            let input = Map.with(strings: [
+                "2199943210",
+                "3987894921",
+                "9856789892",
+                "8767896789",
+                "9899965678",
+            ])
             var risk = 0
             for x in 0..<input.size.x {
                 for y in 0..<input.size.y {
@@ -80,11 +72,12 @@ struct Day9: Problem {
                 }
             }
             return risk
-        }()
-        return (first, 0)
+        }
     }
 
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+    struct S2: Solver {
+        func solve(with input: Map) async throws -> Int {
+            0
+        }
     }
 }

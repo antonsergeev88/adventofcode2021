@@ -95,44 +95,43 @@ extension Day5 {
     }
 }
 
-struct Day5: Problem {
-    func input(from stream: InputStream) throws -> [Line] {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day5: Day {
+    let dayNumber = 5
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> [Day5.Line] {
+            input.map(Line.with(input:))
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return text.split(separator: "\n").map(String.init).map(Line.with(input:))
     }
 
-    func process(_ input: [Line]) async throws -> (first: Int, second: Int) {
-        var map: [Point: Int] = [:]
-        for line in input {
-            for point in FlatLine(line) {
-                map[point] = map[point] == nil ? 1 : map[point]! + 1
+    struct S1: Solver {
+        func solve(with input: [Day5.Line]) async throws -> Int {
+            var map: [Point: Int] = [:]
+            for line in input {
+                for point in FlatLine(line) {
+                    map[point] = map[point] == nil ? 1 : map[point]! + 1
+                }
             }
+            let overlaps = map.filter { $0.value > 1 }
+            return overlaps.count
         }
-        let overlaps = map.filter { $0.value > 1 }
-
-        for line in input {
-            for point in DiagonalLine(line) {
-                map[point] = map[point] == nil ? 1 : map[point]! + 1
-            }
-        }
-
-        let allOverlaps = map.filter { $0.value > 1 }
-
-        return (overlaps.count, allOverlaps.count)
     }
 
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+    struct S2: Solver {
+        func solve(with input: [Day5.Line]) async throws -> Int {
+            var map: [Point: Int] = [:]
+            for line in input {
+                for point in FlatLine(line) {
+                    map[point] = map[point] == nil ? 1 : map[point]! + 1
+                }
+            }
+            for line in input {
+                for point in DiagonalLine(line) {
+                    map[point] = map[point] == nil ? 1 : map[point]! + 1
+                }
+            }
+            let allOverlaps = map.filter { $0.value > 1 }
+            return allOverlaps.count
+        }
     }
 }

@@ -55,40 +55,31 @@ extension Day4 {
     }
 }
 
-struct Day4: Problem {
-    func input(from stream: InputStream) throws -> (moves: [Int], boards: [Board]) {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
-        }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        let strings = text.split(separator: "\n").map(String.init)
-        let moves = strings.first!.split(separator: ",").map(String.init).compactMap(Int.init)
-        let lines = strings.dropFirst().map {
-            $0.split(separator: " ").map(String.init).compactMap(Int.init)
-        }
-        let boards: [Board] = {
-            var boards = [Board]()
-            var i = 0
-            while i + 4 < lines.count {
-                let values = Array(lines[i..<(i+5)])
-                boards.append(.init(values: values))
-                i += 5
+struct Day4: Day {
+    let dayNumber = 4
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> (moves: [Int], boards: [Day4.Board]) {
+            let moves = input.first!.split(separator: ",").map(String.init).compactMap(Int.init)
+            let lines = input.dropFirst().map {
+                $0.split(separator: " ").map(String.init).compactMap(Int.init)
             }
-            return boards
-        }()
-        return (moves, boards)
+            let boards: [Board] = {
+                var boards = [Board]()
+                var i = 0
+                while i + 4 < lines.count {
+                    let values = Array(lines[i..<(i+5)])
+                    boards.append(.init(values: values))
+                    i += 5
+                }
+                return boards
+            }()
+            return (moves, boards)
+        }
     }
 
-    func process(_ input: (moves: [Int], boards: [Board])) async throws -> (first: Int, second: Int) {
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: (moves: [Int], boards: [Day4.Board])) async throws -> Int {
             var lastMove: Int?
             var lastBoard: Int?
             let moves = input.moves
@@ -104,9 +95,11 @@ struct Day4: Problem {
                 }
             }
             return moves[lastMove!] * boards[lastBoard!].uncheckedSum
-        }()
+        }
+    }
 
-        let second: Int = {
+    struct S2: Solver {
+        func solve(with input: (moves: [Int], boards: [Day4.Board])) async throws -> Int {
             var lastMove: Int?
             var lastBoard: Int?
             let moves = input.moves
@@ -122,11 +115,8 @@ struct Day4: Problem {
                 }
             }
             return moves[lastMove!] * boards[lastBoard!].uncheckedSum
-        }()
-        return (first, second)
+        }
     }
 
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
-    }
+
 }

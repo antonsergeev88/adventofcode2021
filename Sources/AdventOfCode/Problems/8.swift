@@ -1,44 +1,40 @@
 import Foundation
 
-struct Day8: Problem {
-    func input(from stream: InputStream) throws -> [(digits: [String], code: [String])] {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
-        }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return text.split(separator: "\n").map(String.init).compactMap { input in
-            let split = input.split(separator: "|")
-            guard split.count == 2 else {
-                return nil
+struct Day8: Day {
+    let dayNumber = 8
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> [(digits: [String], code: [String])] {
+            input.compactMap { input in
+                let split = input.split(separator: "|")
+                guard split.count == 2 else {
+                    return nil
+                }
+                return (
+                    split[0].split(separator: " ").map(String.init),
+                    split[1].split(separator: " ").map(String.init)
+                )
             }
-            return (
-                split[0].split(separator: " ").map(String.init),
-                split[1].split(separator: " ").map(String.init)
-            )
         }
     }
 
-    func process(_ input: [(digits: [String], code: [String])]) async throws -> (first: Int, second: Int) {
-        let first = input.map(\.code).reduce(0) { partialResult, code in
-            partialResult + code.filter { digit in
-                switch digit.count {
-                case 2...4, 7:
-                    return true
-                default:
-                    return false
-                }
-            }.count
+    struct S1: Solver {
+        func solve(with input: [(digits: [String], code: [String])]) async throws -> Int {
+            input.map(\.code).reduce(0) { partialResult, code in
+                partialResult + code.filter { digit in
+                    switch digit.count {
+                    case 2...4, 7:
+                        return true
+                    default:
+                        return false
+                    }
+                }.count
+            }
         }
+    }
 
-        let second: Int = {
+    struct S2: Solver {
+        func solve(with input: [(digits: [String], code: [String])]) async throws -> Int {
             var result = 0
             for line in input {
                 let digits = line.digits.map(Set.init)
@@ -81,12 +77,6 @@ struct Day8: Problem {
                 result += num
             }
             return result
-        }()
-
-        return (first, second)
-    }
-
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+        }
     }
 }

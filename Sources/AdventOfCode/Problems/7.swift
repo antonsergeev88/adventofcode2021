@@ -1,43 +1,37 @@
 import Foundation
 
-struct Day7: Problem {
-    func input(from stream: InputStream) throws -> [Int] {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day7: Day {
+    let dayNumber = 7
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> [Int] {
+            input.first!.split(separator: ",").map(String.init).compactMap(Int.init)
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return text.split(separator: "\n").first!.split(separator: ",").map(String.init).compactMap(Int.init)
     }
 
-    func process(_ input: [Int]) async throws -> (first: Int, second: Int) {
-        let sorted = input.sorted()
-        let median = sorted[input.count / 2]
-        let first = input.reduce(0) { partialResult, element in
-            partialResult + abs(element - median)
+    struct S1: Solver {
+        func solve(with input: [Int]) async throws -> Int {
+            let sorted = input.sorted()
+            let median = sorted[input.count / 2]
+            return input.reduce(0) { partialResult, element in
+                partialResult + abs(element - median)
+            }
         }
-
-        let min = sorted.first!
-        let max = sorted.last!
-
-        let secondMed = findMin(min: min, max: max, input: sorted)
-        let second = input.reduce(0) { partialResult, element in
-            let diff = abs(secondMed - element)
-            return partialResult + (1 + diff) * diff / 2
-        }
-
-        return (first, second)
     }
 
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+    struct S2: Solver {
+        func solve(with input: [Int]) async throws -> Int {
+            let sorted = input.sorted()
+
+            let min = sorted.first!
+            let max = sorted.last!
+
+            let secondMed = findMin(min: min, max: max, input: sorted)
+            return input.reduce(0) { partialResult, element in
+                let diff = abs(secondMed - element)
+                return partialResult + (1 + diff) * diff / 2
+            }
+        }
     }
 }
 

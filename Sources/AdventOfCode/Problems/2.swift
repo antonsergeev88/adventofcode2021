@@ -37,25 +37,17 @@ extension Command {
     }
 }
 
-struct Day2: Problem {
-    func input(from stream: InputStream) throws -> [Command] {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day2: Day {
+    let dayNumber = 2
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> [Command] {
+            input.compactMap(Command.init(inputLine:))
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return text.split(separator: "\n").map(String.init).compactMap(Command.init(inputLine:))
     }
 
-    func process(_ input: [Command]) async throws -> (first: Int, second: Int) {
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: [Command]) async throws -> Int {
             var vertical = 0
             var horizontal = 0
             input.forEach { command in
@@ -66,9 +58,11 @@ struct Day2: Problem {
                 }
             }
             return vertical * horizontal
-        }()
+        }
+    }
 
-        let second: Int = {
+    struct S2: Solver {
+        func solve(with input: [Command]) async throws -> Int {
             var vertical = 0
             var horizontal = 0
             var aim = 0
@@ -82,12 +76,6 @@ struct Day2: Problem {
                 }
             }
             return vertical * horizontal
-        }()
-
-        return (first: first, second: second)
-    }
-
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+        }
     }
 }
