@@ -72,25 +72,17 @@ extension Day11 {
     }
 }
 
-struct Day11: Problem {
-    func input(from stream: InputStream) throws -> Map {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day11: Day {
+    let dayNumber = 11
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> Day11.Map {
+            .with(strings: input)
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return .with(strings: text.split(separator: "\n").map(String.init))
     }
 
-    func process(_ input: Map) async throws -> (first: Int, second: Int) {
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: Day11.Map) async throws -> Int {
             var flashCount = 0
             var map = input
             for _ in 1...100 {
@@ -98,8 +90,11 @@ struct Day11: Problem {
                 flashCount += map.zeros
             }
             return flashCount
-        }()
-        let second: Int = {
+        }
+    }
+
+    struct S2: Solver {
+        func solve(with input: Day11.Map) async throws -> Int {
             var step = 0
             var map = input
             while map.zeros != map.values.count * map.values[0].count {
@@ -107,11 +102,6 @@ struct Day11: Problem {
                 map.step()
             }
             return step
-        }()
-        return (first, second)
-    }
-
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+        }
     }
 }

@@ -59,25 +59,17 @@ extension Day12 {
     }
 }
 
-struct Day12: Problem {
-    func input(from stream: InputStream) throws -> Map {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day12: Day {
+    let dayNumber = 12
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> Day12.Map {
+            .with(strings: input)
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return .with(strings: text.split(separator: "\n").map(String.init))
     }
 
-    func process(_ input: Map) async throws -> (first: Int, second: Int) {
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: Day12.Map) async throws -> Int {
             var counter: [Node: Int] = {
                 var counter = [Node: Int]()
                 func add(root: Node) {
@@ -109,8 +101,11 @@ struct Day12: Problem {
             }
             findPathsToEnd(root: input.start)
             return first
-        }()
-        let second: Int = {
+        }
+    }
+
+    struct S2: Solver {
+        func solve(with input: Day12.Map) async throws -> Int {
             var counter: [Node: Int] = {
                 var counter = [Node: Int]()
                 func add(root: Node) {
@@ -154,11 +149,6 @@ struct Day12: Problem {
                 findPathsToEnd(root: node)
             }
             return first
-        }()
-        return (first, second)
-    }
-
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+        }
     }
 }

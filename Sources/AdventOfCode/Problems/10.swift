@@ -51,25 +51,17 @@ struct Boundary {
     let side: Side
 }
 
-struct Day10: Problem {
-    func input(from stream: InputStream) throws -> [[Boundary]] {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
+struct Day10: Day {
+    let dayNumber = 10
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> [[Boundary]] {
+            input.map(Boundary.from(line:))
         }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        return text.split(separator: "\n").map(String.init).map(Boundary.from(line:))
     }
 
-    func process(_ input: [[Boundary]]) async throws -> (first: Int, second: Int) {
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: [[Boundary]]) async throws -> Int {
             var score = 0
             lines: for line in input {
                 var stack: [Boundary] = []
@@ -95,9 +87,11 @@ struct Day10: Problem {
                 }
             }
             return score
-        }()
+        }
+    }
 
-        let second: Int = {
+    struct S2: Solver {
+        func solve(with input: [[Boundary]]) async throws -> Int {
             var scores: [Int] = []
             lines: for line in input {
                 var stack: [Boundary] = []
@@ -125,12 +119,6 @@ struct Day10: Problem {
                 scores.append(score)
             }
             return scores.sorted()[scores.count / 2]
-        }()
-
-        return (first, second)
-    }
-
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+        }
     }
 }

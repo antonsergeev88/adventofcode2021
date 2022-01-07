@@ -1,33 +1,24 @@
 import Foundation
 
-struct Day14: Problem {
-    func input(from stream: InputStream) throws -> (sequence: String, dict: [String: Character]) {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
-        }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        let sequence = text.split(separator: "\n").map(String.init).first!
-        let dict = text.split(separator: "\n").map(String.init).reduce(into: [String: Character]()) { partialResult, line in
-            let array = line.split(separator: " ").map(String.init)
-            guard array.count == 3, array[1] == "->" else {
-                return
-            }
-            partialResult[array[0]] = array[2].first!
-        }
+struct Day14: Day {
+    let dayNumber = 14
 
-        return (sequence, dict)
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> (sequence: String, dict: [String : Character]) {
+            let sequence = input.first!
+            let dict = input.reduce(into: [String: Character]()) { partialResult, line in
+                let array = line.split(separator: " ").map(String.init)
+                guard array.count == 3, array[1] == "->" else {
+                    return
+                }
+                partialResult[array[0]] = array[2].first!
+            }
+            return (sequence, dict)
+        }
     }
 
-    func process(_ input: (sequence: String, dict: [String: Character])) async throws -> (first: Int, second: Int) {
-        let first: Int = {
+    struct S1: Solver {
+        func solve(with input: (sequence: String, dict: [String : Character])) async throws -> Int {
             var result = input.sequence
             for _ in 0..<10 {
                 result = result.step(with: input.dict)
@@ -39,8 +30,11 @@ struct Day14: Problem {
                 .map { $0.value }
                 .sorted()
             return firstCount.last! - firstCount.first!
-        }()
-        let second: Int = {
+        }
+    }
+
+    struct S2: Solver {
+        func solve(with input: (sequence: String, dict: [String : Character])) async throws -> Int {
             var extraSymbols = input.sequence.dropFirst().dropLast().reduce(into: [Character: Int]()) { partialResult, char in
                 partialResult[char] = partialResult[char] != nil ? partialResult[char]! + 1 : 1
             }
@@ -73,12 +67,7 @@ struct Day14: Problem {
             let sorted = allSymbols.map { $0.value }.sorted()
 
             return sorted.last! - sorted.first!
-        }()
-        return (first, second)
-    }
-
-    func text(from output: (first: Int, second: Int)) -> String {
-        String(describing: output)
+        }
     }
 }
 

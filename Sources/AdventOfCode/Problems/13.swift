@@ -1,67 +1,63 @@
 import Foundation
 
-struct Day13: Problem {
-    func input(from stream: InputStream) throws -> Input {
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        defer {
-            buffer.deallocate()
-        }
-        while stream.hasBytesAvailable {
-            let count = stream.read(buffer, maxLength: 1024)
-            data.append(buffer, count: count)
-        }
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw ProblemError.badInput
-        }
-        let points = text.split(separator: "\n").map(String.init).compactMap { line -> Point? in
-            let components = line.split(separator: ",").map(String.init).compactMap(Int.init)
-            guard components.count == 2 else {
-                return nil
+struct Day13: Day {
+    let dayNumber = 13
+
+    struct P: Parser {
+        func parse(_ input: [String]) throws -> Input {
+            let points = input.compactMap { line -> Point? in
+                let components = line.split(separator: ",").map(String.init).compactMap(Int.init)
+                guard components.count == 2 else {
+                    return nil
+                }
+                return .init(components[0], components[1])
             }
-            return .init(components[0], components[1])
-        }
-        let map = MapWithSet(points)
-        let folds = text.split(separator: "\n").map(String.init).compactMap { line -> Fold? in
-            let components = line
-                .replacingOccurrences(of: "fold along ", with: "")
-                .split(separator: "=")
-                .map(String.init)
-            guard components.count == 2, components[0] == "x" || components[0] == "y", let coord = Int(components[1]) else {
-                return nil
+            let map = MapWithSet(points)
+            let folds = input.compactMap { line -> Fold? in
+                let components = line
+                    .replacingOccurrences(of: "fold along ", with: "")
+                    .split(separator: "=")
+                    .map(String.init)
+                guard components.count == 2, components[0] == "x" || components[0] == "y", let coord = Int(components[1]) else {
+                    return nil
+                }
+                if components[0] == "x" {
+                    return .x(coord)
+                } else {
+                    return .y(coord)
+                }
             }
-            if components[0] == "x" {
-                return .x(coord)
-            } else {
-                return .y(coord)
-            }
+            return .init(map: map, folds: folds)
         }
-        return .init(map: map, folds: folds)
     }
 
-    func process(_ input: Input) async throws -> (first: Int, second: String) {
-        let folded = input.map.folded(by: input.folds.first!)
-        var first = 0
-        for x in 0..<folded.size.x {
-            for y in 0..<folded.size.y {
-                first += folded[.init(x, y)] ? 1 : 0
+    struct S1: Solver {
+        func solve(with input: Input) async throws -> Int {
+            let folded = input.map.folded(by: input.folds.first!)
+            var first = 0
+            for x in 0..<folded.size.x {
+                for y in 0..<folded.size.y {
+                    first += folded[.init(x, y)] ? 1 : 0
+                }
             }
+            return first
         }
-        let secondMap = input.folds.reduce(input.map) { partialResult, fold in
-            partialResult.folded(by: fold)
-        }
-        var second = ""
-        for y in 0..<secondMap.size.y {
-            for x in 0..<secondMap.size.x {
-                second.append(secondMap[.init(x, y)] ? "*" : " ")
-            }
-            second.append("\n")
-        }
-        return (first, second)
     }
 
-    func text(from output: (first: Int, second: String)) -> String {
-        "(first: \(output.first), second:\n\(output.second))"
+    struct S2: Solver {
+        func solve(with input: Input) async throws -> String {
+            let secondMap = input.folds.reduce(input.map) { partialResult, fold in
+                partialResult.folded(by: fold)
+            }
+            var second = "\n"
+            for y in 0..<secondMap.size.y {
+                for x in 0..<secondMap.size.x {
+                    second.append(secondMap[.init(x, y)] ? "*" : " ")
+                }
+                second.append("\n")
+            }
+            return second
+        }
     }
 }
 
