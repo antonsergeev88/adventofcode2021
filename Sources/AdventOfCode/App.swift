@@ -1,3 +1,5 @@
+import Foundation
+
 @main
 struct App {
     static func main() async throws {
@@ -19,8 +21,9 @@ struct App {
         ]
         
         for processor in processors {
+            let start = Date()
             let result = try await processor.process()
-            print("Day \(processor.dayNumber)\n\tPart 1: \(result.first)\n\tPart 2: \(result.second)")
+            print("Day \(processor.dayNumber) (\(Int(-start.timeIntervalSinceNow * 1_000)) ms)\n\tPart 1: \(result.first)\n\tPart 2: \(result.second)")
         }
     }
 }
